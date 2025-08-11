@@ -1,1 +1,84 @@
+import pulp
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 1. Define the problem
+problem = pulp.LpProblem("Production_Optimization", pulp.LpMaximize)
+
+# 2. Decision variables
+x_A = pulp.LpVariable("x_A", lowBound=0, cat='Continuous')
+x_B = pulp.LpVariable("x_B", lowBound=0, cat='Continuous')
+
+# 3. Objective function
+problem += 50 * x_A + 40 * x_B
+
+# 4. Constraints
+problem += x_A + 2 * x_B <= 100
+problem += 2 * x_A + x_B <= 150
+
+# 5. Solve
+problem.solve()
+result_A = pulp.value(x_A)
+result_B = pulp.value(x_B)
+result_profit = pulp.value(problem.objective)
+
+print(f"Optimal Product A: {result_A}")
+print(f"Optimal Product B: {result_B}")
+print(f"Max Profit: ${result_profit}")
+
+# 6. Prepare graph
+x = np.linspace(0, 100, 400)
+y1 = (100 - x) / 2
+y2 = 150 - 2 * x
+
+plt.figure(figsize=(9, 7))
+
+# Plot constraints
+plt.plot(x, y1, label=r'$x_A + 2x_B = 100$', color='blue', linewidth=2)
+plt.plot(x, y2, label=r'$2x_A + x_B = 150$', color='red', linewidth=2)
+
+# Feasible region
+y_min = np.minimum(y1, y2)
+plt.fill_between(x, y_min, 0, where=(x >= 0) & (y_min >= 0), color='gray', alpha=0.3)
+
+# Corner points (intersection points)
+corners = []
+# Intersection of each constraint with axes
+corners.append((0, 50))   # From x_A=0 in Machine 1 constraint
+corners.append((75, 0))   # From x_B=0 in Machine 2 constraint
+corners.append((0, 100/2)) # From x_A=0 in Machine 1 constraint
+corners.append((150/2, 0)) # From x_B=0 in Machine 2 constraint
+
+# Actual intersection of constraints
+A = np.array([[1, 2], [2, 1]])
+b = np.array([100, 150])
+intersection = np.linalg.solve(A, b)
+corners.append(tuple(intersection))
+
+# Plot corner points
+for point in corners:
+    if point[0] >= 0 and point[1] >= 0:
+        plt.plot(point[0], point[1], 'ko')
+        plt.text(point[0]+1, point[1]+1, f"({point[0]:.0f},{point[1]:.0f})", fontsize=10)
+
+# Optimal solution point
+plt.plot(result_A, result_B, 'go', markersize=10, label="Optimal Solution")
+plt.text(result_A+1, result_B, f"Opt ({result_A:.0f}, {result_B:.0f})", fontsize=12, color='green')
+
+# Objective function line for visualization
+profit_line_x = np.linspace(0, 60, 100)
+profit_line_y = (result_profit - 50 * profit_line_x) / 40
+plt.plot(profit_line_x, profit_line_y, '--', color='purple', label="Objective Function Line")
+
+# Formatting
+plt.xlim(0, 60)
+plt.ylim(0, 60)
+plt.xlabel('Product A (x_A)')
+plt.ylabel('Product B (x_B)')
+plt.title('Linear Programming: Feasible Region, Corner Points & Optimal Solution')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+
+plt.show()
 
