@@ -96,6 +96,9 @@ $$
 This formulation provides a solution to maximize profits while ensuring resource constraints are satisfied.
 
 Output:-
+
+<img width="774" height="590" alt="image" src="https://github.com/user-attachments/assets/fb5f031f-9e12-4a42-8e94-ab36438f225d" />
+
 Optimal number of Product A to produce: 25.0
 Optimal number of Product B to produce: 37.5
 Maximum profit: $ 2375.0
